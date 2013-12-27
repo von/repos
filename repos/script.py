@@ -64,15 +64,9 @@ def check(args):
             output("{}: Not a repo".format(repo))
             continue
         debug("Checking {}".format(r.wd))
-        attrs = []
-        if r.needs_pull():
-            attrs.append("needs pull")
-        if r.needs_push():
-            attrs.append("needs push")
-        if r.needs_commit():
-            attrs.append("needs commit")
-        if len(attrs):
-            output("{}: {}".format(r.wd, ", ".join(attrs)))
+        status = r.status_string()
+        if status:
+            output("{}: {}".format(r.wd, status))
             action_needed = True
     return 1 if action_needed else 0
 
