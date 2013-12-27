@@ -98,6 +98,42 @@ def find(args):
     return 0
 
 
+def next(args):
+    """Find next repo that needs action
+
+    Output shell code to cd to that repo and print status."""
+    global store
+    repos = store.load()
+    # If we are in a repo that is in our list, find the next
+    # Otherwise, we use the first
+    try:
+        r = Repo(".")
+        i = repos.index(r.wd) + 1
+        repos = repos[i:] + repos[:i]  # rotate i
+        # Next repo is now is first position
+    except git.InvalidGitRepositoryError:
+        # We're not in a repo
+        pass
+    except ValueError:
+        # Repo we are in is not in repos
+        pass
+    # Find next repo with a status
+    for repo in repos:
+        try:
+            r = Repo(repo)
+        except git.InvalidGitRepositoryError:
+            continue
+        status = r.status_string()
+        if status:
+            break
+    else:
+        output("Done.")
+        return 0
+    output("cd {} && echo \"{}: {}\"".format(r.wd,
+                                             r.wd,
+                                             r.status_string()))
+    return 0
+
 ######################################################################
 #
 # Utility function
@@ -142,6 +178,9 @@ def main(argv=None):
                              help="automatically add new repos")
     parser_find.add_argument("start_path", default=".", nargs="?",
                              help="path to start search", metavar="path")
+
+    parser_next = subparsers.add_parser('next', help=next.__doc__)
+    parser_next.set_defaults(func=next)
 
     args = parser.parse_args()
 
