@@ -63,6 +63,9 @@ def check(args):
         except git.InvalidGitRepositoryError:
             output("{}: Not a repo".format(repo))
             continue
+        except git.errors.NoSuchPathError:
+            output("{}: Does not exist".format(repo))
+            continue
         debug("Checking {}".format(r.wd))
         status = r.status_string()
         if status:
