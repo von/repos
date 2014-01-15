@@ -11,16 +11,17 @@ class Repo(git.Repo):
     def needs_commit(self):
         """Return True if commit needed, False otherwise."""
         try:
-            dirty = self.is_dirty
-        except git.errors.GitCommandError:
+            dirty = self.is_dirty()
+        except git.exc.GitCommandError:
             return False
         return dirty
 
     def needs_pull(self):
         """Return True if pull needed, False otherwise."""
         try:
-            commits = self.commits_between("master", "origin")
-        except git.errors.GitCommandError:
+            commits = self.head.commit.diff(self.refs[0].commit)
+            #commits = self.commits_between("master", "origin")
+        except git.exc.GitCommandError:
             return False
         behind = sum(1 for c in commits)
         return True if behind > 0 else False
@@ -28,8 +29,9 @@ class Repo(git.Repo):
     def needs_push(self):
         """Return True if push needed, False otherwise."""
         try:
-            commits = self.commits_between("origin", "master")
-        except git.errors.GitCommandError:
+            commits = self.refs[0].commit.diff(self.head.commit)
+            #commits = self.commits_between("origin", "master")
+        except git.exc.GitCommandError:
             return False
         ahead = sum(1 for c in commits)
         return True if ahead > 0 else False

@@ -39,14 +39,14 @@ def add(args):
     for repo in args.repo:
         try:
             r = Repo(os.path.expanduser(repo))
-        except git.InvalidGitRepositoryError:
+        except git.exc.InvalidGitRepositoryError:
             output("Not a repo: {}".format(repo))
             continue
-        if r.wd in repos:
-            output("Already in repos: {}".format(r.wd))
+        if r.working_dir in repos:
+            output("Already in repos: {}".format(r.working_dir))
             continue
-        output("Adding {}".format(r.wd))
-        repos.append(r.wd)
+        output("Adding {}".format(r.working_dir))
+        repos.append(r.working_dir)
     store.save(repos)
     return 0
 
@@ -60,16 +60,16 @@ def check(args):
     for repo in repos:
         try:
             r = Repo(os.path.expanduser(repo))
-        except git.InvalidGitRepositoryError:
+        except git.exc.InvalidGitRepositoryError:
             output("{}: Not a repo".format(repo))
             continue
-        except git.errors.NoSuchPathError:
+        except git.exc.NoSuchPathError:
             output("{}: Does not exist".format(repo))
             continue
-        debug("Checking {}".format(r.wd))
+        debug("Checking {}".format(r.working_dir))
         status = r.status_string()
         if status:
-            output("{}: {}".format(r.wd, status))
+            output("{}: {}".format(r.working_dir, status))
             action_needed = True
     return 1 if action_needed else 0
 
@@ -82,20 +82,20 @@ def find(args):
     for dirpath, dirnames, filenames in os.walk(args.start_path):
         try:
             r = Repo(dirpath)
-        except git.InvalidGitRepositoryError:
+        except git.exc.InvalidGitRepositoryError:
             continue
         # We are in a git repo.
         # No need to go into subdirectories, so remove them
         del dirnames[:]
-        if r.wd in repos:
+        if r.working_dir in repos:
             continue
         # We are in a git repo not registered and unseen.
         if args.add_new:
-            output("Adding {}".format(r.wd))
-            repos.append(r.wd)
+            output("Adding {}".format(r.working_dir))
+            repos.append(r.working_dir)
             save_needed = True
         else:
-            output(r.wd)
+            output(r.working_dir)
     if save_needed:
         store.save(repos)
     return 0
@@ -111,10 +111,10 @@ def next(args):
     # Otherwise, we use the first
     try:
         r = Repo(".")
-        i = repos.index(r.wd) + 1
+        i = repos.index(r.working_dir) + 1
         repos = repos[i:] + repos[:i]  # rotate i
         # Next repo is now is first position
-    except git.InvalidGitRepositoryError:
+    except git.exc.InvalidGitRepositoryError:
         # We're not in a repo
         pass
     except ValueError:
@@ -124,7 +124,7 @@ def next(args):
     for repo in repos:
         try:
             r = Repo(repo)
-        except git.InvalidGitRepositoryError:
+        except git.exc.InvalidGitRepositoryError:
             continue
         status = r.status_string()
         if status:
@@ -132,8 +132,8 @@ def next(args):
     else:
         output("Done.")
         return 0
-    output("cd {} && echo \"{}: {}\"".format(r.wd,
-                                             r.wd,
+    output("cd {} && echo \"{}: {}\"".format(r.working_dir,
+                                             r.working_dir,
                                              r.status_string()))
     return 0
 

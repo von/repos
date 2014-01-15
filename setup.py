@@ -15,7 +15,7 @@ setup(
         ],
     },
     install_requires=[
-        "GitPython",
+        "GitPython>0.3.1",  # Tried with 0.3.2 RC1
     ],
 
     author="Von Welch",
