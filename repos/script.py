@@ -8,6 +8,7 @@ import sys
 
 import git
 
+from App import RepoApp
 from Repo import Repo
 from ReposStore import ReposStore
 
@@ -145,6 +146,16 @@ def next(args):
 
 
 def main(argv=None):
+    app = RepoApp()
+    try:
+        app.setup()
+        app.run()
+    finally:
+        app.close()
+    return 0  # XXX
+
+
+def oldmain(argv=None):
     # Do argv default this way, as doing it in the functional
     # declaration sets it at compile time.
     if argv is None:
