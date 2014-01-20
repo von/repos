@@ -13,9 +13,15 @@ setup(
         'console_scripts': [
             'repos = repos.script:main',
         ],
+        'repos': [
+            'add = repos.add:AddCommand',
+            'check = repos.check:CheckCommand',
+            'find = repos.find:FindCommand',
+        ],
     },
     install_requires=[
         "GitPython>0.3.1",  # Tried with 0.3.2 RC1
+        "cliff>1.5.0",  # Used 1.5.2
     ],
 
     author="Von Welch",
