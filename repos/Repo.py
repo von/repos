@@ -50,3 +50,12 @@ class Repo(git.Repo):
         if self.needs_commit():
             attrs.append("needs commit")
         return ", ".join(attrs) if len(attrs) else None
+
+    def set_debug_function(self, debug_func):
+        """Set function to handle debugging messages."""
+        self.debug_func = debug_func
+
+    def _debug(self, msg):
+        """Handle a debugging message."""
+        if self.debug_func:
+            self.debug_func(msg)
