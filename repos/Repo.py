@@ -2,11 +2,15 @@
 # encoding: utf-8
 """Repo: wrapper around git.Repo"""
 
+import logging
+
 import git
 
 
 class Repo(git.Repo):
     """Augmented git Repo object"""
+
+    log = logging.getLogger(__name__)
 
     def needs_commit(self):
         """Return True if commit needed, False otherwise."""
@@ -51,11 +55,7 @@ class Repo(git.Repo):
             attrs.append("needs commit")
         return ", ".join(attrs) if len(attrs) else None
 
-    def set_debug_function(self, debug_func):
-        """Set function to handle debugging messages."""
-        self.debug_func = debug_func
 
     def _debug(self, msg):
         """Handle a debugging message."""
-        if self.debug_func:
-            self.debug_func(msg)
+        self.log.debug(msg)
