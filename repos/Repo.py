@@ -20,24 +20,38 @@ class Repo(git.Repo):
             return False
         return dirty
 
+    # XXX Rewrite this as commits_behind and commits_ahead
+
     def needs_pull(self):
         """Return True if pull needed, False otherwise."""
         try:
-            commits = self.head.commit.diff(self.refs[0].commit)
-            #commits = self.commits_between("master", "origin")
+            master = "master"
+            remote = "{}/master".format(self.remote())
+            self._debug(
+                "needs_pull(): Checking between {} and {}".format(
+                    master, remote))
+            commits = self.iter_commits("{}..{}".format(master, remote))
         except git.exc.GitCommandError:
             return False
         behind = sum(1 for c in commits)
+        self._debug("{} is {} commits behind {}".format(
+            master, behind, remote))
         return True if behind > 0 else False
 
     def needs_push(self):
         """Return True if push needed, False otherwise."""
         try:
-            commits = self.refs[0].commit.diff(self.head.commit)
-            #commits = self.commits_between("origin", "master")
+            master = "master"
+            remote = "{}/master".format(self.remote())
+            self._debug(
+                "needs_push(): Checking between {} and {}".format(
+                    remote, master))
+            commits = self.iter_commits("{}..{}".format(remote, master))
         except git.exc.GitCommandError:
             return False
         ahead = sum(1 for c in commits)
+        self._debug("{} is {} commits ahead of {}".format(
+            master, ahead, remote))
         return True if ahead > 0 else False
 
     def status_string(self):
@@ -54,7 +68,6 @@ class Repo(git.Repo):
         if self.needs_commit():
             attrs.append("needs commit")
         return ", ".join(attrs) if len(attrs) else None
-
 
     def _debug(self, msg):
         """Handle a debugging message."""
