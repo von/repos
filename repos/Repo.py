@@ -20,39 +20,33 @@ class Repo(git.Repo):
             return False
         return dirty
 
-    # XXX Rewrite this as commits_behind and commits_ahead
+    def commits_behind_remote(self):
+        """Return the number of commmits we are behind our remote."""
+        master = "master"
+        remote = "{}/master".format(self.remote())
+        self._debug(
+            "commits_behind_remote(): Checking between {} and {}".format(
+                master, remote))
+        commit_count = self.commit_count_between(master, remote)
+        return commit_count
 
-    def needs_pull(self):
-        """Return True if pull needed, False otherwise."""
-        try:
-            master = "master"
-            remote = "{}/master".format(self.remote())
-            self._debug(
-                "needs_pull(): Checking between {} and {}".format(
-                    master, remote))
-            commits = self.iter_commits("{}..{}".format(master, remote))
-        except git.exc.GitCommandError:
-            return False
-        behind = sum(1 for c in commits)
-        self._debug("{} is {} commits behind {}".format(
-            master, behind, remote))
-        return True if behind > 0 else False
+    def commits_ahead_of_remote(self):
+        """Return the number of commmits we are ahead of our remote."""
+        master = "master"
+        remote = "{}/master".format(self.remote())
+        self._debug(
+            "commits_ahead_of_remote(): Checking between {} and {}".format(
+                remote, master))
+        commit_count = self.commit_count_between(remote, master)
+        return commit_count
 
-    def needs_push(self):
-        """Return True if push needed, False otherwise."""
-        try:
-            master = "master"
-            remote = "{}/master".format(self.remote())
-            self._debug(
-                "needs_push(): Checking between {} and {}".format(
-                    remote, master))
-            commits = self.iter_commits("{}..{}".format(remote, master))
-        except git.exc.GitCommandError:
-            return False
-        ahead = sum(1 for c in commits)
-        self._debug("{} is {} commits ahead of {}".format(
-            master, ahead, remote))
-        return True if ahead > 0 else False
+    def commit_count_between(self, from_name, to_name):
+        """Return number of commits from one refence name to another.
+
+        For example: r.commmit_count_between("master", "origin/master")"""
+        commits = self.iter_commits("{}..{}".format(from_name, to_name))
+        count = sum(1 for c in commits)
+        return count
 
     def status_string(self):
         """Return string describing repo status or None if nothing needed
@@ -61,10 +55,12 @@ class Repo(git.Repo):
 
         None means repo needs nothing."""
         attrs = []
-        if self.needs_pull():
-            attrs.append("needs pull")
-        if self.needs_push():
-            attrs.append("needs push")
+        pull_commit_count = self.commits_behind_remote()
+        if pull_commit_count:
+            attrs.append("needs pull({})".format(pull_commit_count))
+        push_commit_count = self.commits_ahead_of_remote()
+        if push_commit_count:
+            attrs.append("needs push({})".format(push_commit_count))
         if self.needs_commit():
             attrs.append("needs commit")
         return ", ".join(attrs) if len(attrs) else None
