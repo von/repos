@@ -8,11 +8,12 @@ setup(
     name="repos",
     version="0.1",
     packages=["repos"],
-    # http://pythonhosted.org/setuptools/setuptools.html#automatic-script-creation  # noqa
     entry_points={
+        # http://pythonhosted.org/setuptools/setuptools.html#automatic-script-creation  # noqa
         'console_scripts': [
             'repos = repos.script:main',
         ],
+        # command entry points via cliff
         'repos': [
             'add = repos.AddCommand:AddCommand',
             'check = repos.CheckCommand:CheckCommand',
