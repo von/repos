@@ -20,6 +20,11 @@ class Repo(git.Repo):
             return False
         return dirty
 
+    def has_remote(self):
+        """Return True if repo has a remote."""
+        # self.remote is empty if we have no remote
+        return self.remote() in self.remotes
+
     def commits_behind_remote(self):
         """Return the number of commmits we are behind our remote."""
         master = "master"
@@ -56,11 +61,14 @@ class Repo(git.Repo):
         None means repo needs nothing."""
         attrs = []
         pull_commit_count = self.commits_behind_remote()
-        if pull_commit_count:
-            attrs.append("needs pull({})".format(pull_commit_count))
-        push_commit_count = self.commits_ahead_of_remote()
-        if push_commit_count:
-            attrs.append("needs push({})".format(push_commit_count))
+        if self.has_remote():
+            if pull_commit_count:
+                attrs.append("needs pull({})".format(pull_commit_count))
+            push_commit_count = self.commits_ahead_of_remote()
+            if push_commit_count:
+                attrs.append("needs push({})".format(push_commit_count))
+        else:
+            attrs.append("no remote")
         if self.needs_commit():
             attrs.append("needs commit")
         return ", ".join(attrs) if len(attrs) else None
