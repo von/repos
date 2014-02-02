@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""An example of subcommands with argparse """
+"""Add repot command"""
 
 import os.path
 
