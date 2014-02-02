@@ -4,6 +4,11 @@ try:
 except:
     from distutils.core import setup
 
+try:
+    long_description = open('README.md', 'rt').read()
+except IOError:
+    long_description = ''
+
 setup(
     name="repos",
     version="0.1",
@@ -30,5 +35,7 @@ setup(
     author="Von Welch",
     author_email="von@vwelch.com",
     description="Manage my git repositories",
+    long_description=long_description,
+    url='https://github.com/von/repos',
     license="Apache2",
 )
