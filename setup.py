@@ -18,6 +18,7 @@ setup(
             'check = repos.CheckCommand:CheckCommand',
             'find = repos.FindCommand:FindCommand',
             'next = repos.NextCommand:NextCommand',
+            'rm = repos.RmCommand:RmCommand',
         ],
     },
     install_requires=[
