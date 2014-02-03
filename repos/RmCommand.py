@@ -17,12 +17,13 @@ class RmCommand(CommandBase):
         repos = self.store.load()
         needs_save = False
         for repo in parsed_args.repo:
+            self.output("Removing {}".format(repo))
             try:
-                self.output("Removing {}".format(repo))
                 repos.remove(repo)
-                needs_save = True
             except ValueError:
                 self.error("Repo not in list: {}".format(repo))
+            else:
+                needs_save = True
         if needs_save:
             self.store.save(repos)
         return 0
