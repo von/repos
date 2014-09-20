@@ -26,7 +26,12 @@ class CheckCommand(CommandBase):
                 self.output("{}: Does not exist".format(repo))
                 continue
             self.log.debug("Checking {}".format(r.working_dir))
-            status = r.status_string()
+            try:
+                status = r.status_string()
+            except Exception as ex:
+                self.output("Error checking {}: {}".format(
+                    r.working_dir, str(ex)))
+                continue
             if status:
                 self.output("{}: {}".format(r.working_dir, status))
                 action_needed = True
