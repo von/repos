@@ -25,14 +25,25 @@ class CheckCommand(CommandBase):
             except git.exc.NoSuchPathError:
                 self.output("{}: Does not exist".format(repo))
                 continue
-            self.log.debug("Checking {}".format(r.working_dir))
-            try:
-                status = r.status_string()
-            except Exception as ex:
-                self.output("Error checking {}: {}".format(
-                    r.working_dir, str(ex)))
-                continue
-            if status:
-                self.output("{}: {}".format(r.working_dir, status))
+            if self.print_repo_status(r):
                 action_needed = True
         return 1 if action_needed else 0
+
+    def print_repo_status(self, repo):
+        """Print the status for a repo if action needed.
+
+        Returns True if action needed, false otherwise."""
+        self.log.debug("Checking {}".format(repo.working_dir))
+        try:
+            status = repo.status_string()
+        except Exception as ex:
+            self.output("Error checking {}: {}".format(
+                repo.working_dir, str(ex)))
+            action_needed = False
+        else:
+            if status:
+                self.output("{}: {}".format(repo.working_dir, status))
+                action_needed = True
+            else:
+                action_needed = False
+        return action_needed
