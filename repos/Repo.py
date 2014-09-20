@@ -27,6 +27,10 @@ class Repo(git.Repo):
         # self.remote is empty if we have no remote
         return self.remote() in self.remotes
 
+    def fetch(self):
+        """Fetch from remote"""
+        self.remote().fetch()
+
     def commits_behind_remote(self):
         """Return the number of commmits we are behind our remote."""
         master = "master"
@@ -55,15 +59,20 @@ class Repo(git.Repo):
         count = sum(1 for c in commits)
         return count
 
-    def status_string(self):
+    def status_string(self, fetch=True):
         """Return string describing repo status or None if nothing needed
 
         String will be comma-separate list of 'needs X' items.
 
         None means repo needs nothing."""
         attrs = []
-        pull_commit_count = self.commits_behind_remote()
         if self.has_remote():
+            if fetch:
+                try:
+                    self.fetch()
+                except Exception:
+                    pass
+            pull_commit_count = self.commits_behind_remote()
             if pull_commit_count:
                 attrs.append("needs pull({})".format(pull_commit_count))
             push_commit_count = self.commits_ahead_of_remote()
