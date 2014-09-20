@@ -21,7 +21,9 @@ class Repo(git.Repo):
         return dirty
 
     def has_remote(self):
-        """Return True if repo has a remote."""
+        """Return True if repo has a remote.
+
+        Note that this doesn't actually validate remote."""
         # self.remote is empty if we have no remote
         return self.remote() in self.remotes
 
