@@ -40,9 +40,10 @@ class CheckCommand(CommandBase):
             except Queue.Empty:
                 # Timeout
                 pass
-            if response:
-                print response
-                action_needed = True
+            else:
+                if response:
+                    print response
+                    action_needed = True
         return 1 if action_needed else 0
 
     def worker(self, repo, queue):
