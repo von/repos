@@ -2,6 +2,8 @@
 """CheckCommand object"""
 
 import os
+import Queue
+import threading
 
 import git
 
@@ -16,6 +18,8 @@ class CheckCommand(CommandBase):
         assert(self.store is not None)
         action_needed = False
         repos = self.store.load()
+        threads = []
+        queue = Queue.Queue()
         for repo in repos:
             try:
                 r = Repo(os.path.expanduser(repo))
@@ -25,25 +29,32 @@ class CheckCommand(CommandBase):
             except git.exc.NoSuchPathError:
                 self.output("{}: Does not exist".format(repo))
                 continue
-            if self.print_repo_status(r):
+            t = threading.Thread(target=self.worker,
+                                 args=(r, queue))
+            threads.append(t)
+            t.start()
+        # Run until only main thread left
+        while threading.active_count() > 1:
+            try:
+                response = queue.get(block=True, timeout=1)
+            except Queue.Empty:
+                # Timeout
+                pass
+            if response:
+                print response
                 action_needed = True
         return 1 if action_needed else 0
 
-    def print_repo_status(self, repo):
-        """Print the status for a repo if action needed.
-
-        Returns True if action needed, false otherwise."""
+    def worker(self, repo, queue):
+        """Get the status for a repo and put in queue if action needed."""
         self.log.debug("Checking {}".format(repo.working_dir))
         try:
             status = repo.status_string()
         except Exception as ex:
             self.output("Error checking {}: {}".format(
                 repo.working_dir, str(ex)))
-            action_needed = False
         else:
             if status:
-                self.output("{}: {}".format(repo.working_dir, status))
-                action_needed = True
+                queue.put("{}: {}".format(repo.working_dir, status))
             else:
-                action_needed = False
-        return action_needed
+                queue.put(None)
