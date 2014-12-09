@@ -33,3 +33,7 @@ To go to the next repo that needs a push, pull or commit:
 
     eval `repos next`
 
+Similar Projets
+---------------
+
+* [myrepos](http://myrepos.branchable.com/)
