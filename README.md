@@ -1,7 +1,7 @@
 repos
 =====
 
-https://github.com/von/repos
+[https://github.com/von/repos](https://github.com/von/repos)
 
 A script for tracking and managing git repositories.
 
